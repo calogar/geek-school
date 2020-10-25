@@ -8,9 +8,13 @@ export const DB_CONFIG: TypeOrmModuleOptions = {
     type: 'mysql',
     host: 'db',
     port: 3306,
-    username: 'dbuser',
-    password: 'dbuser',
+    username: 'root',
+    password: 'root',
     database: 'school',
     entities: [], // We specify the entities in the App Module.
     synchronize: true,
+};
+
+export const JWT_CONFIG = {
+    secret: 'secretKey',
 };

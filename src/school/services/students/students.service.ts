@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Student } from 'src/school/models/student.model';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DeleteResult, InsertResult } from 'typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class StudentsService {
@@ -9,24 +9,10 @@ export class StudentsService {
     constructor (
         @InjectRepository(Student)
         private _repository: Repository<Student>,
-    ) {}
+    ) {
 
-    /**
-     * Get a single Student by its uuid.
-     * @param {string} uuid The Student identifier.
-     */
-    findByUuid(uuid: string): Student {
-        const student: Student = {
-            uuid: '1',
-            name: 'Carlos',
-            surname: 'López',
-            address: 'Here',
-            location: 'There',
-            postalCode: 12345,
-            course: 'My Course',
-            active: true
-        }
-        return student;
+        // Add mock data into the DB.
+        this.addMock();
     }
 
     /**
@@ -38,7 +24,7 @@ export class StudentsService {
         const student = await this._repository.findOne(uuid);
         if (student && student.active)
             return student;
-        throw Error('The Student with the uuid ' + uuid + 'was not found.');
+        return null;
     }
 
     /**
@@ -52,6 +38,7 @@ export class StudentsService {
     /**
      * Creates a new Student.
      * @param {Student} newStudent The Student to create.
+     * @returns {Promise<Student>} The created Student.
      */
     async create(newStudent: Student): Promise<Student> {
         return await this._repository.save({ ...newStudent, uuid: undefined, active: true });
@@ -61,16 +48,25 @@ export class StudentsService {
      * Update a single student. It cannot be updated if it is already deleted.
      * @param {string} uuid The Student id.
      * @param {Student} updateStudent The Student to update.
+     * @returns {Promise<Student>} The updated Student.     
      */
     async update(uuid: string, updateStudent: Student): Promise<Student> {
-        await this.findOne(uuid); // This will throw if not found.
-        return await this._repository.save({ ...updateStudent, uuid: uuid, active: true });
+        let student = await this.findOne(uuid);
+        if (!student)
+            return null;
+        student = {
+            ...student,
+            ...updateStudent, 
+            uuid: uuid, 
+            active: true
+        };
+        return await this._repository.save(student);
     }   
     
     /**
      * Delete a single Student (soft delete).
      * @param {string} uuid The Student id.
-     * @returns {Promise<DeleteResult>} The result of the delete action.
+     * @returns {Promise<boolean>} The result of the delete action.
      */
     async remove(uuid: string): Promise<boolean> {
         await this._repository.save({
@@ -78,5 +74,45 @@ export class StudentsService {
             active: false,
         });
         return true;
+    }
+
+    /**
+     * Add mock data to the database.
+     */
+    async addMock(): Promise<void> {
+        const students: Student[] = [
+            {
+                uuid: '1',
+                name: 'Carlos',
+                surname: 'López',
+                address: 'Here',
+                location: 'There',
+                postalCode: 12345,
+                course: 'My Course',
+                active: true
+            },
+            {
+                uuid: '2',
+                name: 'John',
+                surname: 'Doe',
+                address: 'Here',
+                location: 'There',
+                postalCode: 12345,
+                course: 'My Course',
+                active: true
+            },
+            {
+                uuid: '3',
+                name: 'Hannah',
+                surname: 'Doe',
+                address: 'Here',
+                location: 'There',
+                postalCode: 12345,
+                course: 'My Course',
+                active: true
+            }
+        ];
+        for(let i = 0; i< students.length; i++) 
+            await this.create(students[i]);
     }
 }

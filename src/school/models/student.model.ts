@@ -7,7 +7,7 @@ import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 @Entity()
 export class Student {
 
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn('uuid')
     uuid: string;
 
     @Column()

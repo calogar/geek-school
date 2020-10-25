@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { DB_CONFIG } from './configuration';
 import { Student } from './school/models/student.model';
+import { UsersModule } from './users/users.module';
 
 // The entities that will be considered by the ORM.
 const ormEntities = [ Student ];
@@ -15,7 +16,7 @@ const ormEntities = [ Student ];
   imports: [
     TypeOrmModule.forRoot({ ...DB_CONFIG, entities: [ ...DB_CONFIG.entities, ...ormEntities ] }),
     SchoolModule, 
-    AuthModule
+    AuthModule, UsersModule
   ],
   controllers: [
     AppController
